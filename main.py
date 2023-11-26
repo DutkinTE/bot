@@ -267,7 +267,6 @@ def returnMarkup():
     markup.add(item, item2, item3)
     return markup
 
-
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call):
     if call.message:
