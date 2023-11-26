@@ -29,6 +29,7 @@ def start(message):
             lastName TEXT,
             phone TEXT,
             email TEXT,
+            tgUrl TEXT,
             groupe TEXT,
             role INTEGER
         )""")
@@ -87,7 +88,6 @@ def user_email(message):
     except:
         bot.send_message(message.chat.id, "Введите ваш email")
         bot.register_next_step_handler(message, user_email)
-
 
 def user_groupe(message):
     try:
@@ -226,7 +226,7 @@ def event_members(message):
         global countMembers
         countMembers = message.text.strip()
 
-        connect = sqlite3.connect("usersVolunteer.db")
+        connect = sqlite3.connect("eventVolunteer.db")
         cursor = connect.cursor()
 
         cursor.execute("SELECT idEvent FROM event_id")
@@ -250,9 +250,27 @@ def event_members(message):
                                 idVolunteers INTEGER,
                                 firstName TEXT,
                                 lastName TEXT,
-                                phoneVolunteer TEXT
+                                phoneVolunteer TEXT,
+                                VacPos INTEGER
                             )""")
         connect.commit()
+
+        connectAdmin = sqlite3.connect("usersVolunteer.db")
+        cursorAdmin = connectAdmin.cursor()
+
+        cursorAdmin.execute(f"SELECT firstName, lastName, phone FROM login_id WHERE id = {message.chat.id}")
+        data = cursorAdmin.fetchone()
+        print(data)
+
+        cursor.execute(f"INSERT INTO {nameEvent} VALUES (?, ?, ?, ?, ?, ?);",
+                       (message.chat.id, message.chat.id, data[0], data[1], data[2], countMembers))
+        connectAdmin.commit()
+        cursorAdmin.close()
+        connectAdmin.close()
+        connect.commit()
+        cursor.close()
+        connect.close()
+
     else:
         bot.send_message(message.chat.id, "Напишите нужно количество волонтеров1")
         bot.register_next_step_handler(message, event_members)
