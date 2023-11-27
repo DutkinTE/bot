@@ -339,7 +339,7 @@ def callback(call):
 
             bot.send_message(call.message.chat.id, info, reply_markup=markup, parse_mode='html')
 
-
+        #
         elif call.data == 'reg_to_event':
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, "Напишите id мероприятия")
