@@ -280,8 +280,7 @@ def returnMarkup():
     markup = types.InlineKeyboardMarkup(row_width=2)
     item = types.InlineKeyboardButton('Показать все мероприятия', callback_data='show_event')
     item2 = types.InlineKeyboardButton('Профиль', callback_data='show_profile')
-    item3 = types.InlineKeyboardButton('TEST', callback_data='test')
-    item4 = types.InlineKeyboardButton('YSYSY', callback_data='223')
+    item3 = types.InlineKeyboardButton('Зарегистрироваться на волонтерство', callback_data='reg_to_event')
     markup.add(item, item2, item3)
     return markup
 #nssnns
@@ -340,5 +339,25 @@ def callback(call):
 
             bot.send_message(call.message.chat.id, info, reply_markup=markup, parse_mode='html')
 
+
+        elif call.data == 'reg_to_event':
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            bot.send_message(call.message.chat.id, "Напишите id мероприятия")
+            bot.register_next_step_handler(call.message, reg_user_to_vol)
+
+
+def reg_user_to_vol(message):
+    try:
+        connect = sqlite3.connect("eventVolunteer.db")
+        cursor = connect.cursor()
+
+        print(message.text)
+        sql = f"""UPDATE event_id SET countMembers = countMembers-1 WHERE idEvent={message.text}"""
+        cursor.execute(sql)
+        connect.commit()
+        cursor.close()
+        connect.close()
+    except:
+        print('02')
 
 bot.polling()
