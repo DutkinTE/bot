@@ -369,6 +369,8 @@ def reg_user_to_vol(message):
 
         cursor.execute(f'SELECT nameEvent FROM event_id WHERE idEvent={message.text}')
         data = cursor.fetchone()
+        cursor.execute(f'SELECT descr FROM event_id WHERE idEvent={message.text}')
+        dataDescr = cursor.fetchone()
         print(data[0])
         cursor.execute(f'SELECT countMembers FROM event_id WHERE idEvent={message.text}')
         vacPos = cursor.fetchone()
@@ -400,8 +402,11 @@ def reg_user_to_vol(message):
             cursorEvent.execute(f"INSERT INTO {data[0]} VALUES(?, ?, ?, ?, ?, ?);",
                                 (0, dataUser[0], dataUser[1], dataUser[2], dataUser[3], int(vacPos[0]) - 1))
             connectEvent.commit()
+            bot.send_message(message.chat.id, f"Вы зарегистрировались на мероприятие - {data[0]}")
+            bot.send_message(message.chat.id, f"{dataDescr[0]}")
             print('11111')
         elif (test1 != test):
+            bot.send_message(message.chat.id, f"Судя по всему, вы уже зарегистрированы на мероприятии - {data[0]}")
             print(('319319931'))
 
     except:
