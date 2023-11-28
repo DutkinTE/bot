@@ -361,9 +361,6 @@ def reg_user_to_vol(message):
         cursor = connect.cursor()
 
         print(message.text)
-        sql = f"""UPDATE event_id SET countMembers = countMembers-1 WHERE idEvent={message.text}"""
-        cursor.execute(sql)
-        connect.commit()
 
         connectUser = sqlite3.connect("usersVolunteer.db")
         cursorUser = connectUser.cursor()
@@ -379,9 +376,33 @@ def reg_user_to_vol(message):
         connectEvent = sqlite3.connect(data[0]+".db")
         cursorEvent = connectEvent.cursor()
 
-        cursorEvent.execute(f"INSERT INTO {data[0]} VALUES(?, ?, ?, ?, ?, ?);",
-                            (0, dataUser[0], dataUser[1], dataUser[2], dataUser[3], int(vacPos[0]) - 1))
-        connectEvent.commit()
+        cursorEvent.execute(f'SELECT idVolunteers FROM {data[0]}')
+        dataTest = cursorEvent.fetchall()
+
+        test1 = 0
+        test = len(dataTest)
+        print(test)
+        for i in range(len(dataTest)):
+            res = dataTest[i]
+            check = res[0]
+            print(check)
+            if (message.chat.id != check):
+                test1+=1
+            else:
+                print('2929293')
+
+        print(test1)
+        if (test1 == test):
+            sql = f"""UPDATE event_id SET countMembers = countMembers-1 WHERE idEvent={message.text}"""
+            cursor.execute(sql)
+            connect.commit()
+
+            cursorEvent.execute(f"INSERT INTO {data[0]} VALUES(?, ?, ?, ?, ?, ?);",
+                                (0, dataUser[0], dataUser[1], dataUser[2], dataUser[3], int(vacPos[0]) - 1))
+            connectEvent.commit()
+            print('11111')
+        elif (test1 != test):
+            print(('319319931'))
 
     except:
         print('02')
