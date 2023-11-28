@@ -363,6 +363,7 @@ def reg_user_to_vol(message):
         print(message.text)
         sql = f"""UPDATE event_id SET countMembers = countMembers-1 WHERE idEvent={message.text}"""
         cursor.execute(sql)
+        connect.commit()
 
         connectUser = sqlite3.connect("usersVolunteer.db")
         cursorUser = connectUser.cursor()
@@ -371,15 +372,16 @@ def reg_user_to_vol(message):
 
         cursor.execute(f'SELECT nameEvent FROM event_id WHERE idEvent={message.text}')
         data = cursor.fetchone()
-        print(data)
-        cursor.execute(f'SELECT VacPos FROM event_id')
+        print(data[0])
+        cursor.execute(f'SELECT countMembers FROM event_id WHERE idEvent={message.text}')
         vacPos = cursor.fetchone()
-        print(vacPos)
-        connectEvent = sqlite3.connect(f"{data}.db")
+        print(vacPos[0])
+        connectEvent = sqlite3.connect(data[0]+".db")
         cursorEvent = connectEvent.cursor()
 
-        cursorEvent.execute(f"INSERT INTO {data} VALUES(?, ?, ?, ?, ?, ?);",
-                            (0, dataUser[0], dataUser[1], dataUser[2], dataUser[3], int(vacPos[-1]) - 1))
+        cursorEvent.execute(f"INSERT INTO {data[0]} VALUES(?, ?, ?, ?, ?, ?);",
+                            (0, dataUser[0], dataUser[1], dataUser[2], dataUser[3], int(vacPos[0]) - 1))
+        connectEvent.commit()
 
     except:
         print('02')
