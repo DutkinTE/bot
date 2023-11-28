@@ -89,6 +89,7 @@ def user_email(message):
         bot.send_message(message.chat.id, "Введите ваш email")
         bot.register_next_step_handler(message, user_email)
 
+
 def user_groupe(message):
     try:
         global groupe
@@ -102,11 +103,11 @@ def user_groupe(message):
 
 def user_role(message):
     global role
-    if (message.text == '2'):
+    if message.text == '2':
         bot.send_message(message.chat.id,
                          "Введите пароль организатора. Его можно узнать у руководителя волонтерского движения")
         bot.register_next_step_handler(message, user_toPasswordRole)
-    elif (message.text == '1'):
+    elif message.text == '1':
         role = message.text.strip()
 
         connect = sqlite3.connect("usersVolunteer.db")
@@ -117,6 +118,7 @@ def user_role(message):
         connect.commit()
         cursor.close()
         connect.close()
+        bot.send_message(message.chat.id, "Вы зарегистрированы как волонтер")
     else:
         bot.send_message(message.chat.id, "Если вы волонтер введите '1' Если вы организатор '2'")
         bot.register_next_step_handler(message, user_role)
@@ -124,7 +126,7 @@ def user_role(message):
 
 def user_toPasswordRole(message):
     global role
-    if (message.text == "12345"):
+    if message.text == "12345":
         role = '2'
 
         connect = sqlite3.connect("usersVolunteer.db")
@@ -181,7 +183,7 @@ def addEvent(message):
     cursor.execute(f"SELECT role FROM login_id WHERE id = {people_id}")
     check = cursor.fetchone()
     print(check)
-    if (check[0] == 2):
+    if check[0] == 2:
         bot.send_message(message.chat.id, 'Введите название вашего мероприятия')
         bot.register_next_step_handler(message, event_name)
     else:
@@ -283,13 +285,21 @@ def returnMarkup():
     item3 = types.InlineKeyboardButton('Зарегистрироваться на волонтерство', callback_data='reg_to_event')
     markup.add(item, item2, item3)
     return markup
-#nssnns
+
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call):
     if call.message:
         if call.data == 'back':
             bot.delete_message(call.message.chat.id, call.message.message_id)
-            bot.send_message(call.message.chat.id, "Выберите дейтсвие", reply_markup=returnMarkup())
+            bot.send_message(call.message.chat.id, "Выберите действие", reply_markup=returnMarkup())
+
+        elif call.data == 'edit':
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            item = types.InlineKeyboardButton('Назад', callback_data='back')
+            markup = types.InlineKeyboardMarkup(row_width=1)
+            markup.add(item)
+            bot.send_message(call.message.chat.id, "я еще не сделал", reply_markup=markup)
 
         elif call.data == 'show_profile':
             bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -304,18 +314,18 @@ def callback(call):
             for el in users:
                 info += (f'{el[0]} {el[1]}\n'
                          f'Номер телефона: {el[2]}\n'
-                         f'email: {el[3]}\n'
+                         f'Email: {el[3]}\n'
                          f'Ваша группа: {el[4]}')
 
             cursor.close()
             connect.close()
 
-            markup = types.InlineKeyboardMarkup(row_width=2)
+            markup = types.InlineKeyboardMarkup(row_width=1)
+            item2 = types.InlineKeyboardButton('Редактировать', callback_data='edit')
             item = types.InlineKeyboardButton('Назад', callback_data='back')
-            markup.add(item)
+            markup.add(item, item2)
 
             bot.send_message(call.message.chat.id, info, reply_markup=markup)
-
 
         elif call.data == 'show_event':
             bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -328,7 +338,7 @@ def callback(call):
             info = ''
             for el in events:
                 info += (
-                f'<b>ID мероприятия:</b> {el[0]} \n <b>Название мероприятия:</b> {el[1]} \n <b>Дата проведения:</b> {el[2]} \n <b>Описание мероприятия:</b> {el[3]} \n Количество вакантных мест: {el[4]}\n')
+                    f'<b>ID мероприятия:</b> {el[0]} \n <b>Название мероприятия:</b> {el[1]} \n <b>Дата проведения:</b> {el[2]} \n <b>Описание мероприятия:</b> {el[3]} \n Количество вакантных мест: {el[4]}\n')
 
             cursor.close()
             connect.close()
@@ -339,7 +349,6 @@ def callback(call):
 
             bot.send_message(call.message.chat.id, info, reply_markup=markup, parse_mode='html')
 
-        #
         elif call.data == 'reg_to_event':
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, "Напишите id мероприятия")
@@ -354,10 +363,26 @@ def reg_user_to_vol(message):
         print(message.text)
         sql = f"""UPDATE event_id SET countMembers = countMembers-1 WHERE idEvent={message.text}"""
         cursor.execute(sql)
-        connect.commit()
-        cursor.close()
-        connect.close()
+
+        connectUser = sqlite3.connect("usersVolunteer.db")
+        cursorUser = connectUser.cursor()
+        cursorUser.execute(f'SELECT id, firstName, lastName, phone FROM login_id WHERE id={message.chat.id}')
+        dataUser = cursorUser.fetchone()
+
+        cursor.execute(f'SELECT nameEvent FROM event_id WHERE idEvent={message.text}')
+        data = cursor.fetchone()
+        print(data)
+        cursor.execute(f'SELECT VacPos FROM event_id')
+        vacPos = cursor.fetchone()
+        print(vacPos)
+        connectEvent = sqlite3.connect(f"{data}.db")
+        cursorEvent = connectEvent.cursor()
+
+        cursorEvent.execute(f"INSERT INTO {data} VALUES(?, ?, ?, ?, ?, ?);",
+                            (0, dataUser[0], dataUser[1], dataUser[2], dataUser[3], int(vacPos[-1]) - 1))
+
     except:
         print('02')
+
 
 bot.polling()
