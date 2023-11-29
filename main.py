@@ -302,30 +302,33 @@ def callback(call):
             bot.send_message(call.message.chat.id, "я еще не сделал", reply_markup=markup)
 
         elif call.data == 'show_profile':
-            bot.delete_message(call.message.chat.id, call.message.message_id)
-            connect = sqlite3.connect("usersVolunteer.db")
-            cursor = connect.cursor()
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+                connect = sqlite3.connect("usersVolunteer.db")
+                cursor = connect.cursor()
 
-            people_id = call.message.chat.id
-            cursor.execute(f'SELECT firstName, lastName, phone, email, groupe FROM login_id WHERE id = {people_id}')
-            users = cursor.fetchall()
+                people_id = call.message.chat.id
+                cursor.execute(f'SELECT firstName, lastName, phone, email, groupe FROM login_id WHERE id = {people_id}')
+                users = cursor.fetchall()
 
-            info = ''
-            for el in users:
-                info += (f'{el[0]} {el[1]}\n'
-                         f'Номер телефона: {el[2]}\n'
-                         f'Email: {el[3]}\n'
-                         f'Ваша группа: {el[4]}')
+                info = ''
+                for el in users:
+                    info += (f'{el[0]} {el[1]}\n'
+                             f'Номер телефона: {el[2]}\n'
+                             f'Email: {el[3]}\n'
+                             f'Ваша группа: {el[4]}')
 
-            cursor.close()
-            connect.close()
+                cursor.close()
+                connect.close()
 
-            markup = types.InlineKeyboardMarkup(row_width=1)
-            item2 = types.InlineKeyboardButton('Редактировать', callback_data='edit')
-            item = types.InlineKeyboardButton('Назад', callback_data='back')
-            markup.add(item, item2)
+                markup = types.InlineKeyboardMarkup(row_width=1)
+                item2 = types.InlineKeyboardButton('Редактировать', callback_data='edit')
+                item = types.InlineKeyboardButton('Назад', callback_data='back')
+                markup.add(item, item2)
 
-            bot.send_message(call.message.chat.id, info, reply_markup=markup)
+                bot.send_message(call.message.chat.id, info, reply_markup=markup)
+            except:
+                bot.send_message(call.message.chat.id, "Вы не зарегистрированы")
 
         elif call.data == 'show_event':
             bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -353,7 +356,6 @@ def callback(call):
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, "Напишите id мероприятия")
             bot.register_next_step_handler(call.message, reg_user_to_vol)
-
 
 def reg_user_to_vol(message):
     try:
