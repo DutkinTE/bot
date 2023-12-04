@@ -274,7 +274,7 @@ def event_members(message):
         connect.close()
 
     else:
-        bot.send_message(message.chat.id, "Напишите нужно количество волонтеров1")
+        bot.send_message(message.chat.id, "Напишите нужно количество волонтеров")
         bot.register_next_step_handler(message, event_members)
 
 
@@ -347,13 +347,13 @@ def callback(call):
             connect.close()
 
             markup = types.InlineKeyboardMarkup(row_width=2)
-            item = types.InlineKeyboardButton('Назад', callback_data='back')
-            markup.add(item)
+            item = types.InlineKeyboardButton('Зарегистрироваться на волонтерство', callback_data='reg_to_event')
+            item2 = types.InlineKeyboardButton('Назад', callback_data='back')
+            markup.add(item, item2)
 
             bot.send_message(call.message.chat.id, info, reply_markup=markup, parse_mode='html')
 
         elif call.data == 'reg_to_event':
-            bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, "Напишите id мероприятия")
             bot.register_next_step_handler(call.message, reg_user_to_vol)
 
@@ -409,9 +409,12 @@ def reg_user_to_vol(message):
             print('11111')
         elif (test1 != test):
             bot.send_message(message.chat.id, f"Судя по всему, вы уже зарегистрированы на мероприятии - {data[0]}")
+            bot.send_message(message.chat.id, 'Выбери действие', reply_markup=returnMarkup())
             print(('319319931'))
 
     except:
+
+        bot.send_message(message.chat.id, 'Произошла ошибка, перенаправляем обратно в меню\n Выбери действие', reply_markup=returnMarkup())
         print('02')
 
 
