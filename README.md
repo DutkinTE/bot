@@ -10,6 +10,6 @@
 - [Бабанов Андрей][tgAndrew]
 - [Зенцов Данила][tgDanila]
 
-[tgTimur]: <@PHOEN1X_MARCO>
-[tgAndrew]: <https://github.com/>
-[tgDanila]: <https://github.com/>
+[tgTimur]: <https://t.me/PHOEN1X_MARCO>
+[tgAndrew]: <https://t.me/AndreyBabnv>
+[tgDanila]: <https://t.me/dnsmoo>
